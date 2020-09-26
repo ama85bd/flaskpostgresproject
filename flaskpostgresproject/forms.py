@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, ValidationError, EqualTo
-from flaskpostgresproject.models import EmailFirst
+from flaskpostgresproject.models import EmailFirst, User
+import phonenumbers
 
 
 class RegistrationForm(FlaskForm):
@@ -21,6 +22,19 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+
+class PhoneForm(FlaskForm):
+    phone = StringField('Phone', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
 
 
 class RequestRegistrationForm(FlaskForm):

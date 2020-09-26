@@ -1,6 +1,6 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, session
 from flaskpostgresproject import app, db, bcrypt
-from flaskpostgresproject.forms import RegistrationForm, LoginForm
+from flaskpostgresproject.forms import RegistrationForm, LoginForm, PhoneForm, RequestRegistrationForm
 from flaskpostgresproject.models import EmailFirst
 
 
@@ -43,6 +43,20 @@ def register():
               f'complete your registration.', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/requestregistration', methods=['GET', 'POST'])
+def requestregistration():
+    form = PhoneForm()
+    if form.validate_on_submit():
+        session['phone'] = form.phone.data
+        return redirect(url_for('show_phone'))
+    return render_template('requestregistration.html', form=form)
+
+
+@app.route('/showphone')
+def show_phone():
+    return render_template('show_phone.html', phone=session['phone'])
 
 
 @app.route("/login", methods=['GET', 'POST'])
