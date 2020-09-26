@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for
-from flaskpostgresproject import app
+from flaskpostgresproject import app, db, bcrypt
 from flaskpostgresproject.forms import RegistrationForm, LoginForm
 from flaskpostgresproject.models import EmailFirst
 
@@ -36,6 +36,9 @@ def about():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        firstemail = EmailFirst(email= form.email.data)
+        db.session.add(firstemail)
+        db.session.commit()
         flash(f'An email has been sent on {form.email.data} please check and '
               f'complete your registration.', 'success')
         return redirect(url_for('index'))
