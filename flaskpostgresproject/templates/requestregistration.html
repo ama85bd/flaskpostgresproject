@@ -1,11 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'basephone.html' %}
 {% from 'bootstrap/form.html' import render_form %}
 
-{% block title %}Flask Phone Number Input Demo{% endblock %}
+{% block title %}Together Registration{% endblock %}
 
 {% block content %}
-<h1>Flask Phone Number Input Demo</h1>
+<fieldset class="form-group">
+                <legend class="border-bottom mb-4">Together Register </legend>
 {{ render_form(form) }}
+    <small class="text-muted">Only Bangladeshi people are allowed for using Techreptile Meet
+    but everyone can create post here.</small>
+</fieldset>
+
 {% endblock %}
 
 {% block scripts %}

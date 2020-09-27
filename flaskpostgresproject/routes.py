@@ -1,29 +1,15 @@
-from flask import render_template, flash, redirect, url_for, session
-from flaskpostgresproject import app, db, bcrypt
-from flaskpostgresproject.forms import RegistrationForm, LoginForm, PhoneForm, RequestRegistrationForm
-from flaskpostgresproject.models import EmailFirst
-
-
-
-
-posts = [
-    {
-        'author': 'Corey Schafer',
-        'title': 'Blog Post 1',
-        'content': 'First post content',
-        'date_posted': 'April 20, 2018'
-    },
-    {
-        'author': 'Jane Doe',
-        'title': 'Blog Post 2',
-        'content': 'Second post content',
-        'date_posted': 'April 21, 2018'
-    }
-]
+from flask import render_template, flash, redirect, url_for, session, request
+from flaskpostgresproject import app, db, bcrypt, mail
+from flaskpostgresproject.forms import RegistrationForm, LoginForm, RequestRegistrationForm, RequestRegistrationForm, \
+    PostForm
+from flaskpostgresproject.models import EmailFirst, User, Post
+from flask_mail import Message
 
 
 @app.route("/")
 def index():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.date_posted.desc())
     return render_template('index.html', posts=posts)
 
 
@@ -32,31 +18,49 @@ def about():
     return render_template('about.html', title='About')
 
 
+def send_request_register(email):
+    token = email.get_register_token()
+    msg = Message('Registration Request for Techreptile Together', sender='tech.reptile20@gmail.com', recipients=[email.email])
+    msg.body = f'''To complete your registration, visit the following link:
+    {url_for('requestregistration', token=token, _external=True)}
+    
+    If you did not make this request then simply ignore this email.
+    '''
+    mail.send(msg)
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        firstemail = EmailFirst(email= form.email.data)
+        firstemail = EmailFirst(email=form.email.data)
         db.session.add(firstemail)
         db.session.commit()
+        send_request_register(firstemail)
         flash(f'An email has been sent on {form.email.data} please check and '
               f'complete your registration.', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route('/requestregistration', methods=['GET', 'POST'])
-def requestregistration():
-    form = PhoneForm()
+@app.route('/register/<token>', methods=['GET', 'POST'])
+def requestregistration(token):
+    firstemail = EmailFirst.verify_register_token(token)
+    if firstemail is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('register'))
+    form = RequestRegistrationForm()
     if form.validate_on_submit():
-        session['phone'] = form.phone.data
-        return redirect(url_for('show_phone'))
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(fullname=form.fullname.data, username=form.username.data,
+                    phone=form.phone.data, email=form.email.data,
+                    highestdegree=form.highestdegree.data,
+                    institute=form.institute.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('Your account has been created! You can login now')
+        return redirect(url_for('login'))
     return render_template('requestregistration.html', form=form)
-
-
-@app.route('/showphone')
-def show_phone():
-    return render_template('show_phone.html', phone=session['phone'])
 
 
 @app.route("/login", methods=['GET', 'POST'])

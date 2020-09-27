@@ -8,13 +8,15 @@
     {{ bootstrap.load_css() }}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/css/intlTelInput.css">
     {% endblock %}
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='register.css') }}">
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
+
     <div class="container">
       {% block content %}{% endblock %}
     </div>
+
 
     {% block scripts %}
     {{ bootstrap.load_js() }}
