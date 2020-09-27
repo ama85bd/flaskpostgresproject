@@ -1,5 +1,6 @@
 bcrypt==3.2.0
 blinker==1.4
+Bootstrap-Flask==1.5
 certifi==2020.6.20
 cffi==1.14.2
 click==7.1.2
@@ -15,6 +16,7 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+phonenumbers==8.12.9
 Pillow==7.2.0
 psycopg2==2.8.6
 psycopg2-binary==2.8.6
