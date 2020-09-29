@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, Length, Email, ValidationError, Equ
 from flaskpostgresproject.models import EmailFirst, User
 import phonenumbers
 from flask_wtf.file import FileField, FileAllowed
+from flask_login import current_user
 
 
 class RegistrationForm(FlaskForm):
@@ -40,7 +41,7 @@ class RequestRegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
-    picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png']), DataRequired()])
+    picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Register')
 
     def validate_phone(self, phone):
@@ -61,8 +62,24 @@ class RequestRegistrationForm(FlaskForm):
         if firstemail:
             raise ValidationError('This email is taken. Please choose a different one.')
 
+    def validate_phone(self, phone):
+        phone = User.query.filter_by(phone=phone.data).first()
+        if phone:
+            raise ValidationError('This phone is taken. Please choose a different one.')
+
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Post')
+
+
+class UpdateAccountForm(FlaskForm):
+    fullname = StringField('Full Name',
+                           validators=[DataRequired(), Length(min=2, max=120)])
+    highestdegree = StringField('Highest Degree',
+                                validators=[DataRequired(), Length(min=2, max=120)])
+    institute = StringField('Educational Institute Name of Highest Degree',
+                            validators=[DataRequired(), Length(min=2, max=120)])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Update Account')

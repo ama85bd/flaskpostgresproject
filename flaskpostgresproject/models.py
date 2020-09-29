@@ -1,11 +1,17 @@
 from datetime import datetime
-from flaskpostgresproject import db, app
+from flaskpostgresproject import db, app, login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from flask_login import UserMixin
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 class EmailFirst(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), nullable=False)
 
     def get_register_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -24,7 +30,7 @@ class EmailFirst(db.Model):
         return f"Email('{self.email}')"
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(20), unique=True, nullable=False)

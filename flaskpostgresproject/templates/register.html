@@ -22,13 +22,13 @@
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
-                <h6> <small>You will get an email within 24 hours to get access to Techreptile Meet</small></h6>
+                <h6> <small>You will get an email within 24 hours to get access to <a class="mr-2" target="_blank" href="https://meet.techreptile.com">Techreptile Meet</a> </small></h6>
             </div>
         </form>
     </div>
     <div class="border-top pt-3">
         <small class="text-muted">
-            Already Have An Account? <a href="{{ url_for('login') }}" class="ml-">Sign In</a>
+            Already Have An Account? <a href="{{ url_for('login') }}" class="ml-2">Sign In</a>
         </small>
     </div>
 {% endblock content %}
