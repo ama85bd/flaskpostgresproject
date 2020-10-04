@@ -89,3 +89,7 @@ class CommentForm(FlaskForm):
     comment = TextAreaField('Comment', validators=[DataRequired()])
     submit = SubmitField('Comment')
 
+
+class ReplyCommentForm(FlaskForm):
+    replycomment = TextAreaField('Reply Comment', validators=[DataRequired()])
+    submit = SubmitField('Reply Comment')

@@ -14,7 +14,7 @@ ENV = 'dev'
 if ENV == 'dev':
     app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = \
-        'postgresql://postgres:postgres@localhost/flaskpostgresproject'
+        'postgresql://postgres:4369@localhost/flaskpostgresproject'
 else:
     app.debug = False
     app.config['SQLALCHEMY_DATABASE_URI'] = ''

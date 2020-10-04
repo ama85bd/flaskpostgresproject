@@ -4,8 +4,8 @@ from PIL import Image
 from flask import render_template, flash, redirect, url_for, session, request, abort
 from flaskpostgresproject import app, db, bcrypt, mail
 from flaskpostgresproject.forms import RegistrationForm, LoginForm, RequestRegistrationForm, RequestRegistrationForm, \
-    PostForm, UpdateAccountForm, CommentForm
-from flaskpostgresproject.models import EmailFirst, User, Post, Comment
+    PostForm, UpdateAccountForm, CommentForm, ReplyCommentForm
+from flaskpostgresproject.models import EmailFirst, User, Post, Comment, ReplyComment
 from flask_mail import Message
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -14,6 +14,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 def index():
     page = request.args.get('page', 1, type=int)
     posts = Post.query.all()
+    comments = Comment.query.all()
     return render_template('index.html', posts=posts)
 
 
@@ -153,7 +154,12 @@ def post(post_id):
     post = Post.query.get_or_404(post_id)
     form = CommentForm()
     comments = db.session.query(Comment).filter(Comment.post_id == post.id).all()
-    return render_template('post.html', title=post.title, post=post, form=form, comments=comments)
+    commentid = Comment.query.filter_by(post_id=post.id).all()
+    #comment_id = Comment.query.filter(Comment.post_id).all()
+    reply_comments = db.session.query(ReplyComment).filter(
+        ReplyComment.post_id == post.id and ReplyComment.comment_id == commentid.id).all()
+    return render_template('post.html', title=post.title, post=post, form=form, comments=comments,
+                           reply_comments=reply_comments)
 
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
@@ -199,8 +205,22 @@ def comment_post(post_id):
         db.session.commit()
         flash('Your comment has been posted', 'success')
         return redirect(url_for('post', post_id=post.id))
-    elif request.method == 'GET':
-        comments = Comment.query.get_or_404(post_id)
-        return redirect(url_for('post', post_id=post.id, comments=comments))
-# return render_template('create_post.html', title='Update Post',
-#                        form=form, legend='Update Post')
+
+
+@app.route("/post/<int:post_id>/reply_comment/<int:comment_id>", methods=['GET', 'POST'])
+@login_required
+def reply_comment(post_id, comment_id):
+    post = Post.query.get_or_404(post_id)
+    # form = CommentForm()
+    # reply_form = ReplyCommentForm()
+    comments = db.session.query(Comment).filter(Comment.post_id == post.id).all()
+    commentid = Comment.query.get_or_404(comment_id)
+    text = request.form.get("reply_comment")
+    replycomment = ReplyComment(replycomment=text, replyComID=commentid, postcommentID=post,
+                                Comment_reply_author=current_user)
+    db.session.add(replycomment)
+    db.session.commit()
+    flash('Your reply has been posted', 'success')
+    return redirect(url_for('post', post_id=post.id))
+    # return render_template('post.html', title=post.title, post=post, form=form, comments=comments,
+    #    reply_form=reply_form)

@@ -42,6 +42,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     posts = db.relationship('Post', backref='author', lazy=True)
     comments = db.relationship('Comment', backref='Comment_author', lazy=True)
+    comments_author_reply = db.relationship('ReplyComment', backref='Comment_reply_author', lazy=True)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.picture}')"
@@ -54,6 +55,7 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     comments = db.relationship('Comment', backref='postID', lazy=True)
+    postcomments = db.relationship('ReplyComment', backref='postcommentID', lazy=True)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
@@ -64,6 +66,20 @@ class Comment(db.Model):
     date_comment = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     comment = db.Column(db.Text, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    replycomments = db.relationship('ReplyComment', backref='replyComID', lazy=True)
+
+
+    def __repr__(self):
+        return f"Post('{self.comment}', '{self.date_comment}')"
+
+
+class ReplyComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_comment = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    replycomment = db.Column(db.Text, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
